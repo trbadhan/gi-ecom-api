@@ -18,5 +18,6 @@ Route::prefix('admin')->group(function () {
         });
 
         Route::apiResource('categories', CategoryController::class);
+        Route::post('/categories/reorder', [CategoryController::class, 'reorder']);
     });
 });
