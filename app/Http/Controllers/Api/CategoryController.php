@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
-use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -12,30 +13,20 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::with(['children' => function ($query) {
-            $query->orderBy('order');
+            $query->orderBy('order')->orderBy('name');
         }])
         ->whereNull('parent_id')
         ->orderBy('order')
+        ->orderBy('name')
         ->get();
     
         return response()->json($categories);
     }
 
     // Store new category or subcategory
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'parent_id' => 'nullable|exists:categories,id',
-            'is_active' => 'boolean',
-        ]);
-    
-        // find max order under same parent
-        $maxOrder = Category::where('parent_id', $validated['parent_id'] ?? null)->max('order');
-        $validated['order'] = $maxOrder ? $maxOrder + 1 : 1;
-    
-        $category = Category::create($validated);
-    
+        $category = Category::create($request->validated());
         return response()->json($category, 201);
     }
 
@@ -46,47 +37,16 @@ class CategoryController extends Controller
     }
 
     // Update category
-    public function update(Request $request, Category $category)
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'parent_id' => 'nullable|exists:categories,id',
-            'is_active' => 'sometimes|boolean',
-        ]);
-
-        $category->update($validated);
-
+        $category->update($request->validated());
         return response()->json($category);
-    }
-
-    public function reorder(Request $request)
-    {
-        $validated = $request->validate([
-            'items' => 'required|array',
-            'items.*.id' => 'required|exists:categories,id',
-            'items.*.order' => 'required|integer',
-            'items.*.parent_id' => 'nullable|exists:categories,id',
-        ]);
-
-        foreach ($validated['items'] as $item) {
-            $category = Category::find($item['id']);
-            if ($category) {
-                // Apply new parent + order
-                $category->update([
-                    'parent_id' => $item['parent_id'] ?? null,
-                    'order' => $item['order'],
-                ]);
-            }
-        }
-
-        return response()->json(['message' => 'Categories reordered successfully']);
     }
 
     // Delete category (cascades to children)
     public function destroy(Category $category)
     {
         $category->delete();
-
-        return response()->json(['message' => 'Deleted successfully']);
+        return response()->json(null, 204);
     }
 }

@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AdminAuthController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ProductController;
 
 Route::prefix('admin')->group(function () {
     Route::post('/login', [AdminAuthController::class, 'login']);
@@ -18,6 +19,7 @@ Route::prefix('admin')->group(function () {
         });
 
         Route::apiResource('categories', CategoryController::class);
-        Route::post('/categories/reorder', [CategoryController::class, 'reorder']);
+
+        Route::apiResource('products', ProductController::class);
     });
 });
