@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\api\category;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
@@ -18,7 +18,7 @@ class ProductController extends Controller
     {
         $product = Product::create($request->validated());
         return response()->json($product, 201);
-    }    
+    }
 
     public function show(Product $product)
     {

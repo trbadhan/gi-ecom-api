@@ -1,25 +1,36 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\api\auth\AdminAuthController;
+use App\Http\Controllers\api\auth\UserAuthController;
+use App\Http\Controllers\api\category\CategoryController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AdminAuthController;
-use App\Http\Controllers\Api\CategoryController;
-use App\Http\Controllers\Api\ProductController;
 
-Route::prefix('admin')->group(function () {
-    Route::post('/login', [AdminAuthController::class, 'login']);
+Route::group(['prefix' => 'v2', 'as' => 'v2.', 'middleware' => ['global.token']], function ($router) {
+    Route::prefix('user')->group(function () {
+        Route::post('login', [UserAuthController::class, 'login']);
+        Route::post('logout', [UserAuthController::class, 'logout'])->middleware('auth:api');
+    });
 
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AdminAuthController::class, 'logout']);
-        Route::get('/me', [AdminAuthController::class, 'me']);
+    // ADMIN API
+    Route::prefix('admin')->group(function () {
+        Route::post('login', [AdminAuthController::class, 'login']);
+    });
+});
 
-        // example protected route
-        Route::get('/dashboard', function () {
-            return response()->json(['message' => 'Welcome to Admin Dashboard']);
-        });
 
-        Route::apiResource('categories', CategoryController::class);
+Route::group([
+    'prefix' => 'v2',
+    'as' => 'v2.',
+    'middleware' => ['jwt.verify', 'global.token', 'auth:admin-api']
+], function ($router) {
+    Route::prefix('admin')->group(function () {
+        //Admin user
+        Route::post('logout', [AdminAuthController::class, 'logout']);
+        Route::post('refresh', [AdminAuthController::class, 'refresh']);
+        Route::post('me', [AdminAuthController::class, 'me']);
+        Route::post('update-user', [AdminAuthController::class, 'updateUser']);
 
-        Route::apiResource('products', ProductController::class);
+        //category
+        Route::post('categoy-lists', [CategoryController::class, 'index']);
     });
 });
