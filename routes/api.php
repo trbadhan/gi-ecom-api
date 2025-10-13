@@ -14,6 +14,9 @@ Route::group(['prefix' => 'v2', 'as' => 'v2.', 'middleware' => ['global.token']]
     // ADMIN API
     Route::prefix('admin')->group(function () {
         Route::post('login', [AdminAuthController::class, 'login']);
+
+        //category
+        Route::post('categoy-lists', [CategoryController::class, 'index']);
     });
 });
 
@@ -31,6 +34,6 @@ Route::group([
         Route::post('update-user', [AdminAuthController::class, 'updateUser']);
 
         //category
-        Route::post('categoy-lists', [CategoryController::class, 'index']);
+        Route::post('categoy-store', [CategoryController::class, 'store']);
     });
 });
