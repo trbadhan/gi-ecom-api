@@ -27,7 +27,7 @@ class GlobalToken
      */
     public function handle($request, Closure $next)
     {
-        $token = $request->sig;
+        $token = $request->input('sig') ?? $request->input('sig') ?? $request->query('sig');
 
         // Check if the token is valid
         if ($token !== $this->globalToken) {

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateCategoryRequest extends FormRequest
 {
@@ -19,5 +21,17 @@ class UpdateCategoryRequest extends FormRequest
             'order'     => 'nullable|integer',
             'is_active' => 'boolean',
         ];
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(
+            response()->json([
+                'status'  => false,
+                'code'    => 422,
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors(),
+            ], 422)
+        );
     }
 }
