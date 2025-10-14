@@ -3,6 +3,7 @@
 use App\Http\Controllers\api\auth\AdminAuthController;
 use App\Http\Controllers\api\auth\UserAuthController;
 use App\Http\Controllers\api\category\CategoryController;
+use App\Http\Controllers\api\product\ProductController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['global.token']], function ($router) {
@@ -17,6 +18,9 @@ Route::group(['middleware' => ['global.token']], function ($router) {
 
         //category
         Route::post('categoy-lists', [CategoryController::class, 'index']);
+
+        //product
+        Route::post('product-lists', [ProductController::class, 'index']);
     });
 });
 
@@ -24,8 +28,10 @@ Route::group(['middleware' => ['global.token']], function ($router) {
 Route::group([
     'middleware' => ['jwt.verify', 'global.token', 'auth:admin-api']
 ], function ($router) {
+
+    //Admin user
     Route::prefix('admin')->group(function () {
-        //Admin user
+        //Auth
         Route::post('logout', [AdminAuthController::class, 'logout']);
         Route::post('refresh', [AdminAuthController::class, 'refresh']);
         Route::post('me', [AdminAuthController::class, 'me']);
@@ -33,5 +39,11 @@ Route::group([
 
         //category
         Route::post('categoy-store', [CategoryController::class, 'store']);
+        Route::post('categoy-sort', [CategoryController::class, 'sortData']);
+        Route::put('/categoy/{id}/status', [CategoryController::class, 'updateStatus']);
+        Route::put('/categoy/{category}', [CategoryController::class, 'update']);
+        Route::post('/category/delete', [CategoryController::class, 'destroy']);
+
+        //product
     });
 });
