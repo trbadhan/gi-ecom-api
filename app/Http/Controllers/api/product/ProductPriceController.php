@@ -5,10 +5,12 @@ namespace App\Http\Controllers\api\product;
 use App\Constants\ApiStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductPriceRequest;
+use App\Http\Requests\UpdateProductPriceRequest;
 use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Traits\ApiResponse;
 use App\Traits\Paginatable;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

@@ -16,7 +16,6 @@ class UpdateProductPriceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => 'required|exists:products,id',
             'default_price' => 'required|numeric|min:0',
             'variant_prices' => 'nullable|array',
             'variant_prices.*.name' => 'required_with:variant_prices|string',

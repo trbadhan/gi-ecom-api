@@ -2,22 +2,41 @@
 
 namespace App\Http\Middleware;
 
+use App\Constants\ApiStatus;
+use Closure;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
 
 class Authenticate extends Middleware
 {
-    /**
-     * Get the path the user should be redirected to when they are not authenticated.
-     */
-    protected function redirectTo($request)
+    protected function redirectTo($request): ?string
     {
-        // If the request expects JSON (API request), return null to avoid redirect
-        if ($request->expectsJson()) {
-            return null;
+        // Prevent Laravel from redirecting (for API requests)
+        if ($request->expectsJson() || $request->is('api/*')) {
+            abort(response()->json([
+                'status'  => false,
+                'code'    => ApiStatus::HTTP_401,
+                'message' => 'Unauthorized. Please provide a valid token.',
+            ], 401));
         }
 
-        // Otherwise fallback to web login route
+        // Fallback for web (optional)
         return route('login');
+    }
+
+    public function handle($request, Closure $next, ...$guards)
+    {
+        try {
+            $this->authenticate($request, $guards);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status'  => false,
+                'code'    => ApiStatus::HTTP_401,
+                'message' => 'Unauthorized access. Token missing or invalid.',
+                'errors'  => ['exception' => $e->getMessage()],
+            ], 401);
+        }
+
+        return $next($request);
     }
 }

@@ -57,5 +57,6 @@ Route::group([
 
         //product price
         Route::post('/product-price/store', [ProductPriceController::class, 'store']);
+        Route::put('product-prices/update/{id}', [ProductPriceController::class, 'update']);
     });
 });
