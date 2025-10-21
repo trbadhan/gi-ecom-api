@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreProductRequest extends FormRequest
+class StoreProductImageRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,17 +16,9 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:products,slug',
-            'short_description' => 'nullable|string|max:1000',
-            'detailed_description' => 'nullable|string',
-            'delivery_time' => 'nullable|string|max:255',
-            'warranty' => 'nullable|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'sku' => 'required|string|max:255|unique:products,sku',
-            'brand' => 'nullable|string|max:255',
-            'origin' => 'nullable|string|max:255',
-            'is_active' => 'required|in:active,inactive',
+            'product_id' => 'required|exists:products,id',
+            'main_image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'other_images.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
     }
 

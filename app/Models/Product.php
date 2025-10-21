@@ -4,29 +4,39 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
-        'description',
+        'slug',
+        'short_description',
+        'detailed_description',
+        'delivery_time',
+        'warranty',
         'category_id',
-        'images',
-        'options',
+        'sku',
+        'brand',
+        'origin',
         'is_active',
     ];
 
-    protected $casts = [
-        'images' => 'array',   // auto-cast JSON to array
-        'options' => 'array',  // auto-cast JSON to array
-        'is_active' => 'boolean',
-    ];
-
-    // relation with Category
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
+
+    // Optional: get only the main image
+    public function mainImage()
+    {
+        return $this->hasOne(ProductImage::class)->where('is_main', 'main');
     }
 }

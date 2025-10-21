@@ -4,6 +4,8 @@ use App\Http\Controllers\api\auth\AdminAuthController;
 use App\Http\Controllers\api\auth\UserAuthController;
 use App\Http\Controllers\api\category\CategoryController;
 use App\Http\Controllers\api\product\ProductController;
+use App\Http\Controllers\api\product\ProductImageController;
+use App\Http\Controllers\api\product\ProductPriceController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => ['global.token']], function ($router) {
@@ -45,5 +47,15 @@ Route::group([
         Route::post('/category/delete', [CategoryController::class, 'destroy']);
 
         //product
+        Route::post('product-store', [ProductController::class, 'store']);
+        Route::put('/product/{id}', [ProductController::class, 'update'])->name('products.update');
+
+        //product image
+        Route::post('/product-images/store', [ProductImageController::class, 'uploadImages']);
+        Route::post('/product-images/update', [ProductImageController::class, 'editImages']);
+        Route::delete('product-images/delete/{image}', [ProductImageController::class, 'deleteImage']);
+
+        //product price
+        Route::post('/product-price/store', [ProductPriceController::class, 'store']);
     });
 });

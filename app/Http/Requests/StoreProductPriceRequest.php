@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StoreProductRequest extends FormRequest
+class StoreProductPriceRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,17 +16,11 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:products,slug',
-            'short_description' => 'nullable|string|max:1000',
-            'detailed_description' => 'nullable|string',
-            'delivery_time' => 'nullable|string|max:255',
-            'warranty' => 'nullable|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'sku' => 'required|string|max:255|unique:products,sku',
-            'brand' => 'nullable|string|max:255',
-            'origin' => 'nullable|string|max:255',
-            'is_active' => 'required|in:active,inactive',
+            'product_id' => 'required|exists:products,id',
+            'default_price' => 'required|numeric|min:0',
+            'variant_prices' => 'nullable|array',
+            'variant_prices.*.name' => 'required_with:variant_prices|string',
+            'variant_prices.*.price' => 'required_with:variant_prices|numeric|min:0',
         ];
     }
 
