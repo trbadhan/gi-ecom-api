@@ -27,17 +27,17 @@ class CategoryController extends Controller
             $query = Category::with(['children' => function ($query) {
                 $query->orderBy('order')->orderBy('name');
             }])
-                ->whereNull('parent_id')
+                ->where('parent_id', '0')
                 ->orderBy('order')
                 ->orderBy('name');
 
-            // 🔍 Apply name filter
+            // Apply name filter
             if ($request->filled('name')) {
                 $name = $request->name;
                 $query->where('name', 'like', "%{$name}%");
             }
 
-            // 📄 Pagination
+            // Pagination
             $categories = $query->paginate($per_page, ['*'], 'page', $current_page);
 
             return $this->successResponse(
