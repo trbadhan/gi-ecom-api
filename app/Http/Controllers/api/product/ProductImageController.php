@@ -202,5 +202,6 @@ class ProductImageController extends Controller
                 ApiStatus::HTTP_500
             );
         }
+		
     }
 }

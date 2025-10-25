@@ -77,6 +77,7 @@ class ProductPriceController extends Controller
                 ['exception' => $e->getMessage()],
                 ApiStatus::HTTP_500
             );
+			
         }
     }
 }
