@@ -9,9 +9,8 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
 use App\Traits\ApiResponse;
 use App\Traits\Paginatable;
-use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -27,7 +26,7 @@ class CategoryController extends Controller
             $query = Category::with(['children' => function ($query) {
                 $query->orderBy('order')->orderBy('name');
             }])
-                ->where('parent_id', '0')
+                ->where('parent_id', 0)
                 ->orderBy('order')
                 ->orderBy('name');
 
@@ -55,23 +54,30 @@ class CategoryController extends Controller
         }
     }
 
+
     // Store new category or subcategory
     public function store(StoreCategoryRequest $request)
     {
         try {
-            $category = Category::create($request->validated());
+            $parentId = (int) $request->input('parent_id', 0);
 
-            return $this->successResponse(
-                $category,
-                'Category created successfully',
-                ApiStatus::HTTP_200
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse(
-                'Failed to create category',
-                ['exception' => $e->getMessage()],
-                ApiStatus::HTTP_500
-            );
+            $category = DB::transaction(function () use ($request, $parentId) {
+                $maxOrder = Category::query()
+                    ->where('parent_id', $parentId)
+                    ->lockForUpdate()
+                    ->max('order');
+
+                return Category::create([
+                    'name'      => (string) $request->input('name'),
+                    'parent_id' => $parentId,
+                    'is_active' => true,
+                    'order'     => (int)($maxOrder ?? 0) + 1,
+                ]);
+            });
+
+            return $this->successResponse($category, 'Category created successfully', ApiStatus::HTTP_200);
+        } catch (\Throwable $e) {
+            return $this->errorResponse('Failed to create category', ['exception' => $e->getMessage()], ApiStatus::HTTP_500);
         }
     }
 
@@ -84,25 +90,12 @@ class CategoryController extends Controller
     // Update category
     public function update(UpdateCategoryRequest $request, Category $category)
     {
-        try {
-            $category->update($request->validated());
-
-            return $this->successResponse(
-                $category,
-                'Category updated successfully',
-                ApiStatus::HTTP_200
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse(
-                'Failed to update category',
-                ['exception' => $e->getMessage()],
-                ApiStatus::HTTP_500
-            );
-        }
+        $category->update($request->validated());
+        return response()->json($category);
     }
 
     // Delete category (cascades to children)
-    public function destroy(Request $request)
+    public function destroy(Category $category)
     {
         try {
             $id = $request->id;
